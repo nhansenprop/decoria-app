@@ -1,0 +1,7 @@
+{
+  "name": "@hansen_prop DECORIA – Imagina tu casa con IA",
+  "description": "Sube una foto de un ambiente, y nuestra IA generará tres propuestas de decoración en diferentes estilos. Ajusta los detalles con texto para perfeccionar el diseño de tus sueños.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

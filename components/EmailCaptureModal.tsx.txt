@@ -1,0 +1,72 @@
+import React, { useState, FormEvent } from 'react';
+
+interface EmailCaptureModalProps {
+    isOpen: boolean;
+    onSubmit: (email: string) => void;
+    isProcessing: boolean;
+}
+
+const EmailCaptureModal: React.FC<EmailCaptureModalProps> = ({ isOpen, onSubmit, isProcessing }) => {
+    const [email, setEmail] = useState('');
+    const [error, setError] = useState('');
+
+    const validateEmail = (email: string) => {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    };
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        if (!validateEmail(email)) {
+            setError('Por favor, ingresa un correo electrónico válido.');
+            return;
+        }
+        setError('');
+        onSubmit(email);
+    };
+
+    if (!isOpen) {
+        return null;
+    }
+
+    return (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full ring-1 ring-gray-200">
+                <h2 className="text-2xl font-bold text-[#2D2D2D] text-center">¡Casi listo!</h2>
+                <p className="text-center text-gray-600 mt-2">
+                    Ingresa tu correo para comenzar a generar tus diseños.
+                </p>
+                <form onSubmit={handleSubmit} className="mt-6">
+                    <div className="flex flex-col">
+                        <label htmlFor="email" className="mb-2 font-semibold text-gray-700">
+                            Correo electrónico
+                        </label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="tu@correo.com"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#FF5100] focus:border-transparent transition"
+                            required
+                            disabled={isProcessing}
+                        />
+                        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={isProcessing}
+                        className="w-full mt-6 px-6 py-3 bg-[#FF5100] text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:bg-orange-300 disabled:cursor-wait"
+                    >
+                        {isProcessing ? 'Procesando...' : 'Continuar'}
+                    </button>
+                </form>
+                 <div className="text-xs text-gray-400 mt-4 text-center">
+                    <p>Usaremos tu correo para guardar tus proyectos y notificarte sobre novedades.</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default EmailCaptureModal;

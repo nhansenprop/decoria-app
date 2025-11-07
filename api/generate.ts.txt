@@ -1,0 +1,141 @@
+// Este archivo debe estar en la carpeta /api de tu proyecto para que Vercel lo detecte como una Serverless Function.
+// No importes este archivo desde el código del frontend.
+
+import { GoogleGenAI, Type, Modality, GenerateContentResponse } from "@google/genai";
+import { Product } from '../types';
+
+// La API Key se lee de forma segura desde las variables de entorno del servidor
+if (!process.env.API_KEY) {
+    throw new Error("API_KEY environment variable not set");
+}
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+
+interface StyleDetailsResponse {
+    description: string;
+    furnitureRecs: string;
+    colorRecs: string;
+    products: Product[];
+}
+
+const base64ToGenerativePart = (base64Data: string, mimeType: string) => ({
+    inlineData: { data: base64Data, mimeType },
+});
+
+// Esta es la función principal que Vercel ejecutará
+export default async function handler(req: any, res: any) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method Not Allowed' });
+    }
+
+    const { endpoint, ...body } = req.body;
+
+    try {
+        let result;
+        switch (endpoint) {
+            case 'analyzeImage':
+                result = await handleAnalyzeImage(body);
+                break;
+            case 'generateInitialStyles':
+                result = await handleGenerateInitialStyles(body);
+                break;
+            case 'editImageWithPrompt':
+                result = await handleEditImageWithPrompt(body);
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid endpoint' });
+        }
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(`Error in endpoint ${endpoint}:`, error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        return res.status(500).json({ error: errorMessage });
+    }
+}
+
+
+// Lógica movida desde geminiService.ts al backend
+
+async function handleAnalyzeImage({ image, mimeType }: { image: string, mimeType: string }) {
+    const imagePart = base64ToGenerativePart(image, mimeType);
+    const response: GenerateContentResponse = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: { parts: [
+            { text: "Analiza esta imagen. Entre 13 y 30 palabras, identifica el tipo de espacio (ej. sala de estar, dormitorio) y describe su estilo actual. Responde en español." },
+            imagePart
+        ]},
+    });
+    return { text: response.text };
+}
+
+async function handleGenerateInitialStyles({ image, mimeType }: { image: string, mimeType: string }) {
+    const stylesToGenerate = [
+        { id: 'nordico', name: 'Nórdico', prompt: 'Redecora esta habitación con un estilo nórdico (escandinavo). Prioriza la luz natural, utiliza maderas claras, textiles acogedores y una paleta de colores blancos, grises y pasteles.' },
+        { id: 'moderno', name: 'Moderno', prompt: 'Redecora esta habitación con un estilo moderno. Utiliza líneas limpias, una paleta de colores neutros con toques de color audaces y mobiliario minimalista.' },
+        { id: 'clasico', name: 'Clásico Contemporáneo', prompt: 'Redecora esta habitación con un estilo clásico contemporáneo. Combina elementos clásicos como molduras con mobiliario moderno y elegante. Utiliza una paleta de colores sofisticada y materiales de lujo.' },
+    ];
+
+    const results = await Promise.all(stylesToGenerate.map(async (style) => {
+        const [imageDataUrl, details] = await Promise.all([
+            generateStyledImage(image, mimeType, style.prompt),
+            getStyleDetails(style.name)
+        ]);
+        return {
+            id: style.id,
+            name: style.name,
+            image: imageDataUrl,
+            ...details,
+            originalImageMimeType: mimeType,
+        };
+    }));
+    return { styles: results };
+}
+
+async function handleEditImageWithPrompt({ image, mimeType, prompt }: { image: string, mimeType: string, prompt: string }) {
+    const newImage = await generateStyledImage(image, mimeType, prompt); // Re-using the generation function for edits
+    return { image: newImage };
+}
+
+
+// --- Funciones de ayuda para el backend ---
+
+const generateStyledImage = async (base64Image: string, mimeType: string, stylePrompt: string): Promise<string> => {
+    const imagePart = base64ToGenerativePart(base64Image, mimeType);
+    const response: GenerateContentResponse = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: { parts: [{ text: stylePrompt }, imagePart] },
+        config: { responseModalities: [Modality.IMAGE] },
+    });
+    for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+            return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        }
+    }
+    throw new Error("No image was generated.");
+};
+
+const getStyleDetails = async (styleName: string): Promise<StyleDetailsResponse> => {
+     const response: GenerateContentResponse = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: `Genera una descripción para el estilo de decoración '${styleName}'. Basado en este estilo, proporciona recomendaciones de mobiliario, recomendaciones de paleta de colores, y una lista de 5 productos decorativos que se podrían encontrar en mercadolibre.com. Responde en español.`,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        description: { type: Type.STRING },
+                        furnitureRecs: { type: Type.STRING },
+                        colorRecs: { type: Type.STRING },
+                        products: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: { name: { type: Type.STRING }, url: { type: Type.STRING } }
+                            }
+                        }
+                    }
+                },
+            },
+        });
+    return JSON.parse(response.text) as StyleDetailsResponse;
+};
