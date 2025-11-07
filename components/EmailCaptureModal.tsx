@@ -32,7 +32,7 @@ const EmailCaptureModal: React.FC<EmailCaptureModalProps> = ({ isOpen, onSubmit,
     return (
         <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full ring-1 ring-gray-200">
-                <h2 className="text-2xl font-bold text-[#2D2D2D] text-center">¡Casi listo!</h2>
+                <h2 className="text-2xl font-bold text-brand-gray text-center">¡Casi listo!</h2>
                 <p className="text-center text-gray-600 mt-2">
                     Ingresa tu correo para comenzar a generar tus diseños.
                 </p>
@@ -47,7 +47,7 @@ const EmailCaptureModal: React.FC<EmailCaptureModalProps> = ({ isOpen, onSubmit,
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="tu@correo.com"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#FF5100] focus:border-transparent transition"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
                             required
                             disabled={isProcessing}
                         />
@@ -56,7 +56,7 @@ const EmailCaptureModal: React.FC<EmailCaptureModalProps> = ({ isOpen, onSubmit,
                     <button
                         type="submit"
                         disabled={isProcessing}
-                        className="w-full mt-6 px-6 py-3 bg-[#FF5100] text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:bg-orange-300 disabled:cursor-wait"
+                        className="w-full mt-6 px-6 py-3 bg-brand-orange text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:bg-orange-300 disabled:cursor-wait"
                     >
                         {isProcessing ? 'Procesando...' : 'Continuar'}
                     </button>
