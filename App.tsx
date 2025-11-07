@@ -91,7 +91,7 @@ function App() {
     };
 
     return (
-        <div className="bg-gray-50 min-h-screen text-[#2D2D2D]">
+        <div className="bg-gray-50 min-h-screen text-brand-gray">
             <Header />
             <EmailCaptureModal
                 isOpen={isEmailModalOpen}
@@ -102,7 +102,7 @@ function App() {
                 {isLoading && (
                     <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
                         <LoadingSpinner />
-                        <p className="mt-4 text-lg font-semibold text-[#2D2D2D]">{loadingMessage}</p>
+                        <p className="mt-4 text-lg font-semibold text-brand-gray">{loadingMessage}</p>
                     </div>
                 )}
 
@@ -122,14 +122,14 @@ function App() {
                     <div className="mb-8 bg-white rounded-xl shadow-lg overflow-hidden p-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                             <div className="flex-grow">
-                                <h2 className="text-2xl font-bold text-[#2D2D2D]">Tu Espacio</h2>
+                                <h2 className="text-2xl font-bold text-brand-gray">Tu Espacio</h2>
                                 {analysisResult ? (
                                     <p className="mt-2 text-gray-600 text-sm">{analysisResult}</p>
                                 ) : (
                                     !isLoading && !generatedStyles.length && <p className="mt-2 text-gray-600 text-sm">Análisis pendiente...</p>
                                 )}
                             </div>
-                            <button onClick={resetApp} className="px-4 py-2 text-sm font-semibold text-white bg-[#FF5100] rounded-md hover:bg-orange-600 transition-colors whitespace-nowrap w-full sm:w-auto">
+                            <button onClick={resetApp} className="px-4 py-2 text-sm font-semibold text-white bg-brand-orange rounded-md hover:bg-orange-600 transition-colors whitespace-nowrap w-full sm:w-auto">
                                 Subir otra foto
                             </button>
                         </div>
@@ -138,7 +138,7 @@ function App() {
 
                 {generatedStyles.length > 0 && (
                     <>
-                        <h2 className="text-3xl font-bold text-center mb-8 text-[#2D2D2D]">Aquí tienes tus propuestas</h2>
+                        <h2 className="text-3xl font-bold text-center mb-8 text-brand-gray">Aquí tienes tus propuestas</h2>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {generatedStyles.map(style => (
                                 <StyleCard
