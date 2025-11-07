@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useCallback } from 'react';
 import { ImageData } from '../types';
 import { CameraIcon, UploadIcon } from './IconComponents';
@@ -61,13 +60,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, isLoading 
     return (
         <div className="w-full max-w-2xl mx-auto p-4 flex flex-col items-center">
              <div 
-                className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-[#FF5100] hover:bg-orange-50 transition-colors"
+                className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-brand-orange hover:bg-orange-50 transition-colors"
                 onClick={() => onButtonClick(fileInputRef)}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
              >
                 <UploadIcon className="w-12 h-12 mx-auto text-gray-400" />
-                <p className="mt-2 text-lg font-medium text-[#2D2D2D]">
+                <p className="mt-2 text-lg font-medium text-brand-gray">
                     Arrastra una foto o haz clic para seleccionar
                 </p>
                 <p className="text-sm text-gray-500">
@@ -81,7 +80,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, isLoading 
             <button
                 onClick={() => onButtonClick(cameraInputRef)}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#2D2D2D] text-white rounded-lg font-semibold hover:bg-[#4d4d4d] transition-colors disabled:bg-gray-400"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-brand-gray text-white rounded-lg font-semibold hover:bg-[#4d4d4d] transition-colors disabled:bg-gray-400"
             >
                 <CameraIcon className="w-6 h-6" />
                 Usar la cámara
